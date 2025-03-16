@@ -64,7 +64,10 @@ export default function TeamDetailRoot(): React.ReactElement {
                     <BreadCrumbs pathname={pathname} team={team} pages={pages} selectedPage={selectedPage} />
                     {
                         selectedPage && selectedPage.description && !pathname.includes("edit") &&
-                        <div className="tooltip tooltip-left" data-tip={selectedPage?.description}>
+                        <div className="tooltip tooltip-left">
+                            <div className="tooltip-content max-w-120 w-120">
+                                {selectedPage.description}
+                            </div>
                             <InformationCircleIcon className="w-6 h-6" />
                         </div>
                     }
@@ -85,7 +88,7 @@ export default function TeamDetailRoot(): React.ReactElement {
                     <div className="flex flex-row items-center justify-between ms-2">
                         <div className="text-xl font-semibold">Pages</div>
                         {
-                            team.is_admin &&    
+                            team.is_admin &&
                             <NavLink to={`/team/${teamId}/page/create`} className="btn btn-primary min-h-8 h-8" >
                                 Add Page
                                 <PlusCircleIcon className="w-5 h-5" />
@@ -102,7 +105,7 @@ export default function TeamDetailRoot(): React.ReactElement {
                                     pages.map((page: Page, index: number) => {
                                         return (
                                             <li key={index} className="flex flex-row w-full h-10 join join-horizontal">
-                                                <button className={selectedPage?.id == page.id ? `menu-active menu-disabled grow ${team.is_admin ? "rounded-r-none":""}` : "grow"} onClick={() => setSelectedPage(page)}>
+                                                <button className={selectedPage?.id == page.id ? `menu-active menu-disabled grow ${team.is_admin ? "rounded-r-none" : ""}` : "grow"} onClick={() => setSelectedPage(page)}>
                                                     {page.title.length > 14 ? page.title.slice(0, 14) + "..." : page.title}
                                                 </button>
                                                 {

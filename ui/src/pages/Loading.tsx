@@ -10,6 +10,11 @@ const messages: string[] = [
     "Double checking the bits",
     "Deploying skynet to cloud",
     "Reticulating splines",
+    "Testing the users patience",
+    "Dividing by zero",
+    "Loading the loading screen",
+    "Removing indents from the codebase",
+    
 ];
 
 export default function Loading(): React.ReactElement {
