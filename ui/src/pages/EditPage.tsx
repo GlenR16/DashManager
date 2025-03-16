@@ -1,18 +1,19 @@
 import { AxiosInstance } from "axios";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useOutletContext, useParams } from "react-router-dom";
 import useAxiosAuth from "../utils/ApiProvider";
 import { useEffect, useState } from "react";
 import Page from "../models/Page";
 import Error from "./Error";
 import Graph from "../models/Graph";
 import Loading from "./Loading";
-import { ChartBarIcon, DocumentChartBarIcon, PencilIcon, PlusCircleIcon, UserGroupIcon } from "@heroicons/react/24/solid";
+import { PlusCircleIcon } from "@heroicons/react/24/solid";
 import GraphEditCollapse from "../components/GraphEditCollapse";
 import DeleteGraphModal from "../components/DeleteGraphModal";
 
 export default function EditPage(): React.ReactElement {
-    const pageId = useParams().id;
+    const pageId = useParams().pageId as string;
     const axios: AxiosInstance = useAxiosAuth();
+    const { refreshBaseData } = useOutletContext() as { refreshBaseData: () => Promise<any> };
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [deleteGraphData, setDeleteGraphData] = useState<{ id: number, name: string }>({
@@ -40,8 +41,9 @@ export default function EditPage(): React.ReactElement {
     });
 
     async function refreshData() {
+        await refreshBaseData();
         return axios.get("/page/" + pageId)
-            .then((response) => {
+            .then(async (response) => {
                 setPage(response.data);
                 return axios.get("/team/" + response.data.team)
                     .then((response) => {
@@ -65,48 +67,18 @@ export default function EditPage(): React.ReactElement {
     }, []);
 
     return (
-        <div className="h-full flex flex-col gap-4">
-            <div className="flex flex-row items-center justify-between w-full bg-primary text-primary-content px-4">
-                <div className="breadcrumbs text-sm">
-                    <ul>
-                        <li>
-                            <NavLink to={"/dashboard"}>
-                                <ChartBarIcon className="w-4 h-4" />
-                                Dashboard
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to={`/team/${team.id}`} className="inline-flex items-center gap-2">
-                                <UserGroupIcon className="w-4 h-4" />
-                                {team.name}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <span className="inline-flex items-center gap-2 not-a-link">
-                                <DocumentChartBarIcon className="w-4 h-4" />
-                                {page.title}
-                            </span>
-                        </li>
-                        <li>
-                            <span className="inline-flex items-center gap-2 not-a-link">
-                                <PencilIcon className="w-4 h-4" />
-                                Edit Page
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+        <div className="h-full flex flex-col p-4 gap-4">
             <DeleteGraphModal deleteGraphId={deleteGraphData.id} deleteGraphName={deleteGraphData.name} refreshData={refreshData} />
-            <div className="flex flex-row justify-between items-center px-4">
+            <div className="flex flex-row justify-between items-center">
                 <div className="text-2xl font-semibold text-center">
                     Edit Page
                 </div>
-                <NavLink to={`/graph/create/page/${pageId}`} className="btn btn-primary min-h-8 h-8" >
+                <NavLink to={`/team/${team.id}/page/${page.id}/graph/create`} className="btn btn-primary min-h-8 h-8" >
                     Create Graph
                     <PlusCircleIcon className="w-6 h-6" />
                 </NavLink>
             </div>
-            <div className="flex flex-col p-4 gap-4">
+            <div className="flex flex-col gap-4">
                 {
                     isLoading ?
                         <Loading />
@@ -117,7 +89,7 @@ export default function EditPage(): React.ReactElement {
                                     {
                                         page.graphs.map((graph: Graph, index: number) => {
                                             return (
-                                                <GraphEditCollapse key={index} graph={graph} setDeleteGraphData={setDeleteGraphData} />
+                                                <GraphEditCollapse key={index} graph={graph} setDeleteGraphData={setDeleteGraphData} refreshData={refreshData} />
                                             );
                                         })
                                     }

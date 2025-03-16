@@ -1,6 +1,5 @@
-import { ChartBarIcon, DocumentChartBarIcon, UserGroupIcon } from "@heroicons/react/24/solid";
 import { AxiosInstance } from "axios";
-import { NavigateFunction, NavLink, useNavigate, useParams } from "react-router-dom";
+import { NavigateFunction, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import useAxiosAuth from "../utils/ApiProvider";
 import { useEffect, useState } from "react";
 import Page from "../models/Page";
@@ -8,15 +7,14 @@ import SubmitButton from "../components/SubmitButton";
 import InputField from "../components/InputField";
 import SelectField from "../components/SelectField";
 import EditorField from "../components/EditorField";
-import Team from "../models/Team";
 
 export default function CreateGraph(): React.ReactElement {
-    const pageId = useParams().pageId;
+    const pageId = useParams().pageId as string;
     const axios: AxiosInstance = useAxiosAuth();
     const navigate: NavigateFunction = useNavigate();
+    const { refreshBaseData } = useOutletContext() as { refreshBaseData: () => Promise<any> };
 
     const [page, setPage] = useState<Page | null>(null);
-    const [team, setTeam] = useState<Team | null>(null);
     const [graphForm, setGraphForm] = useState<any>({
         title: "",
         description: "",
@@ -38,13 +36,6 @@ export default function CreateGraph(): React.ReactElement {
         return axios.get("/page/" + pageId)
             .then(async (response) => {
                 setPage(response.data);
-                return axios.get("/team/" + response.data.team)
-                    .then((response) => {
-                        setTeam(response.data);
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                    });
             })
             .catch((error) => {
                 console.error(error);
@@ -78,7 +69,22 @@ export default function CreateGraph(): React.ReactElement {
     }
 
     function handleGraphEditorChange(value: string | undefined, _: any, name: string) {
-        setGraphForm({ ...graphForm, [name]: value });
+        try {
+            const parsedValue = JSON.parse(value || "{}");
+            setGraphForm({
+                ...graphForm,
+                [name]: parsedValue
+            });
+            setGraphFormErrors({
+                ...graphFormErrors,
+                [name]: ""
+            });
+        } catch (error) {
+            setGraphFormErrors({
+                ...graphFormErrors,
+                [name]: "Invalid JSON"
+            });
+        }
     }
 
     function handleGraphCheckboxChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -88,6 +94,7 @@ export default function CreateGraph(): React.ReactElement {
     async function submitCreateGraph() {
         return axios.post("/graph", { ...graphForm, page: pageId })
             .then((_) => {
+                refreshBaseData();
                 navigate("/team/" + page?.team);
             })
             .catch((error) => {
@@ -97,36 +104,6 @@ export default function CreateGraph(): React.ReactElement {
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex flex-row items-center justify-between w-full bg-primary text-primary-content px-4">
-                <div className="breadcrumbs text-sm">
-                    <ul>
-                        <li>
-                            <NavLink to={"/dashboard"}>
-                                <ChartBarIcon className="w-4 h-4" />
-                                Dashboard
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to={`/team/${team?.id}`} className="inline-flex items-center gap-2">
-                                <UserGroupIcon className="w-4 h-4" />
-                                {team?.name}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <span className="inline-flex items-center gap-2 not-a-link">
-                                <DocumentChartBarIcon className="w-4 h-4" />
-                                {page?.title}
-                            </span>
-                        </li>
-                        <li>
-                            <span className="inline-flex items-center gap-2 not-a-link">
-                                <ChartBarIcon className="w-4 h-4" />
-                                Create Graph
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
             <div className="p-4 flex flex-col gap-4">
                 <div className="text-2xl font-semibold text-center">
                     Create Graph
@@ -162,11 +139,11 @@ export default function CreateGraph(): React.ReactElement {
                                     </SelectField>
                                 </div>
                                 <div className="flex flex-col md:flex-row gap-4 items-center">
-                                    <EditorField label='Meta' language='json' value={graphForm.meta} onChange={handleGraphEditorChange} error={graphFormErrors.meta} />
+                                    <EditorField label='Meta' language='json' name="meta" value={graphForm.meta} onChange={handleGraphEditorChange} error={graphFormErrors.meta} />
                                 </div>
                             </div>
                             <div className="card-actions justify-end mt-2">
-                                <SubmitButton label="Create Graph" onClick={submitCreateGraph} style="btn btn-primary min-h-10 h-10 btn-block" />
+                                <SubmitButton label="Create Graph" onClick={submitCreateGraph} style="btn-primary btn-block" />
                             </div>
                         </div>
                     </div>

@@ -16,7 +16,7 @@ export default function JoinTeamModal({ refreshData }: JoinTeamModalProps): Reac
     });
 
     async function submitInviteCode() {
-        return axios.post("/team/functions", {
+        return axios.post("/team/members", {
             invite_code: inviteCode,
         })
         .then(() => {

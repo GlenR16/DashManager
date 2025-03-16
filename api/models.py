@@ -31,8 +31,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     
 class Team(models.Model):
     name = models.CharField(_("Name"),max_length=255)
-    admin = models.ForeignKey(User,on_delete=models.SET_NULL,related_name="owned_teams",null=True)
     invite_code = models.CharField(_("Invite Code"),max_length=31,default=generate_invite_code,unique=True)
+    admins = models.ManyToManyField(User,related_name="owned_teams")
     members = models.ManyToManyField(User,related_name="member_in_teams")
 
     created_at = models.DateTimeField(_("Created At"),auto_now_add=True)

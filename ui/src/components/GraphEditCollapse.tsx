@@ -6,7 +6,7 @@ import useAxiosAuth from '../utils/ApiProvider';
 import InputField from './InputField';
 import EditorField from './EditorField';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 
 interface GraphEditCollapseProps {
     graph: Graph;
@@ -14,10 +14,13 @@ interface GraphEditCollapseProps {
         id: number;
         name: string;
     }>>;
+    refreshData: () => Promise<any>;
 }
 
-export default function GraphEditCollapse({ graph, setDeleteGraphData }: GraphEditCollapseProps): React.ReactElement {
+export default function GraphEditCollapse({ graph, setDeleteGraphData, refreshData }: GraphEditCollapseProps): React.ReactElement {
     const axios: AxiosInstance = useAxiosAuth();
+    const teamId: string = useParams().teamId as string;
+
     const [graphForm, setGraphForm] = useState({
         title: graph.title,
         description: graph.description,
@@ -113,8 +116,9 @@ export default function GraphEditCollapse({ graph, setDeleteGraphData }: GraphEd
 
     async function submitGraphForm() {
         return axios.put("/graph/" + graph.id, graphForm)
-            .then(() => {
+            .then(async () => {
                 setToastMessage("Graph updated successfully");
+                await refreshData();
                 setTimeout(() => {
                     setToastMessage("");
                 }, 5000);
@@ -136,7 +140,7 @@ export default function GraphEditCollapse({ graph, setDeleteGraphData }: GraphEd
                 </div>
             }
             <input type="radio" name="graphItem" />
-            <div className="collapse-title font-semibold">
+            <div className="collapse-title font-semibold inline-flex items-center">
                 {graph.title}
             </div>
             <div className="collapse-content text-sm">
@@ -168,7 +172,7 @@ export default function GraphEditCollapse({ graph, setDeleteGraphData }: GraphEd
                         </SelectField>
                     </div>
                     <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <EditorField label='Meta' language='json' value={graphForm.meta} onChange={handleGraphEditorChange} error={graphFormErrors.meta} />
+                        <EditorField label='Meta' name='meta' language='json' value={graphForm.meta} onChange={handleGraphEditorChange} error={graphFormErrors.meta} />
                     </div>
                 </div>
 
@@ -177,7 +181,7 @@ export default function GraphEditCollapse({ graph, setDeleteGraphData }: GraphEd
                         <button className="btn btn-primary min-h-8 h-8" onClick={submitGraphForm}>
                             Save
                         </button>
-                        <NavLink to={`/graph/${graph.id}/edit`} className="btn btn-primary min-h-8 h-8">
+                        <NavLink to={`/team/${teamId}/page/${graph.page}/graph/${graph.id}/edit`} className="btn btn-primary min-h-8 h-8">
                             Edit Graph Data
                         </NavLink>
                     </div>

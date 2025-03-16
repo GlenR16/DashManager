@@ -8,11 +8,16 @@ from rest_framework.permissions import  AllowAny,IsAuthenticated
 from rest_framework import mixins
 
 from api.models import DataArray, DataPoint, Graph, Page, Team, User, generate_invite_code
-from api.serializers import DataArraySerializer, DataPointSerializer, GraphSerializer, PageSerializer, PageSerializerShort, TeamSerializer, UserSerializer
+from api.permissions import IsDataArrayAdmin, IsDataPointAdmin, IsGraphAdmin, IsPageAdmin, IsTeamAdmin
+from api.serializers import DataArraySerializer, DataPointSerializer, GraphSerializer, PageSerializer, PageSerializerShort, TeamSerializer, UserSerializer, UserCreateSerializer, UserPasswordUpdateSerializer
 
 # Create your views here.
 class UserViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,GenericViewSet):
-    serializer_class = UserSerializer
+    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        return UserSerializer
 
     def get_permissions(self):
         if self.action == 'create' or self.action == 'options' :
@@ -21,56 +26,101 @@ class UserViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.Updat
     
     def get_object(self):
         return self.request.user
+    
+class UserPasswordUpdateView(mixins.UpdateModelMixin,GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserPasswordUpdateSerializer
+
+    def get_object(self):
+        return self.request.user
 
 class TeamViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.ListModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,GenericViewSet):
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action == 'create' or self.action == 'list' or self.action == 'retrieve' or self.action == 'options' :
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsTeamAdmin() ]
 
     def get_queryset(self):
-        return (self.request.user.owned_teams.all() | self.request.user.member_in_teams.all()).distinct()
+        return Team.objects.filter(members=self.request.user)
     
     def perform_create(self, serializer):
-        serializer.save(admin=self.request.user, members=[self.request.user])
+        serializer.save(admins=[self.request.user], members=[self.request.user])
 
 
-class TeamFunctionalView(APIView):
+class TeamMembersView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return (self.request.user.owned_teams.all() | self.request.user.member_in_teams.all()).distinct()
+        return Team.objects.all()
     
     def post(self, request, *args, **kwargs):
         if 'invite_code' not in request.data:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"invite_code": ["This field is required."]})
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"invite_code": ["This field is required"]})
         invite_code = request.data.get('invite_code')
-        team = Team.objects.filter(invite_code=invite_code).first()
+        team = self.get_queryset().filter(invite_code=invite_code).first()
         if team is None:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"invite_code": ["Invalid invite code."]})
         team.members.add(request.user)
         return Response(status=status.HTTP_200_OK)
     
-    def put(self, request, *args, **kwargs):
-        if 'id' not in request.data:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"id": ["This field is required"]})
-        pk = request.data.get('id')
+    def delete(self, request, *args, **kwargs):
+        if 'team' not in request.data:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"team": ["This field is required"]})
+        pk = request.data.get('team')
         team = self.get_queryset().filter(pk=pk).first()
         if team is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"id": ["Invalid team id."]})
-        if team.admin != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        if 'admin' not in request.data:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"admin": ["This field is required"]})
-        admin = get_object_or_404(User, pk=request.data.get('admin'))
-        team.admin = admin
-        team.save()
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"team": ["Invalid team id."]})
+        if team.members.filter(pk=request.user.pk).exists():
+            team.members.remove(request.user)
+        if team.admins.filter(pk=request.user.pk).exists():
+            team.admins.remove(request.user)
+        return Response(status=status.HTTP_200_OK)
+            
+class TeamAdminsView(APIView):
+    permission_classes = [IsAuthenticated, IsTeamAdmin]
+
+    def get_queryset(self):
+        return Team.objects.filter(admins=self.request.user)
+    
+    def post(self, request, *args, **kwargs):
+        if 'user' not in request.data:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"user": ["This field is required"]})
+        if 'team' not in request.data:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"team": ["This field is required"]})
+        team_pk = request.data.get('team')
+        team = self.get_queryset().filter(pk=team_pk).first()
+        if team is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"team": ["Invalid team id."]})
+        user_pk = request.data.get('user')
+        user = team.members.filter(pk=user_pk).first()
+        if user is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"user": ["Invalid user id."]})
+        team.admins.add(user)
+        return Response(status=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        if 'user' not in request.data:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"user": ["This field is required"]})
+        if 'team' not in request.data:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"team": ["This field is required"]})
+        team_pk = request.data.get('team')
+        team = self.get_queryset().filter(pk=team_pk).first()
+        if team is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"team": ["Invalid team id."]})
+        user_pk = request.data.get('user')
+        user = team.admins.filter(pk=user_pk).first()
+        if user is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"user": ["Invalid user id."]})
+        team.admins.remove(user)
         return Response(status=status.HTTP_200_OK)
 
 class TeamKeyFunctionalView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeamAdmin]
 
     def get_queryset(self):
-        return (self.request.user.owned_teams.all() | self.request.user.member_in_teams.all()).distinct()
-    
+        return Team.objects.filter(admins=self.request.user)
         
     def post(self, request, *args, **kwargs):
         if 'id' not in request.data:
@@ -79,8 +129,6 @@ class TeamKeyFunctionalView(APIView):
         team = self.get_queryset().filter(pk=pk).first()
         if team is None:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"id": ["Invalid team id."]})
-        if team.admin != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
         team.invite_code = generate_invite_code()
         team.save()
         return Response(status=status.HTTP_200_OK)
@@ -88,10 +136,14 @@ class TeamKeyFunctionalView(APIView):
 
 class PageViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.ListModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,GenericViewSet):
     serializer_class = PageSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return (Page.objects.filter(team__members=self.request.user) | Page.objects.filter(team__admin=self.request.user)).distinct()
+        return Page.objects.filter(team__members=self.request.user)
+    
+    def get_permissions(self):
+        if self.action == 'create' or self.action == 'list' or self.action == 'options' :
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsPageAdmin()]
     
     def list(self, request, *args, **kwargs):
         team_pk = kwargs.get('pk')
@@ -101,24 +153,28 @@ class PageViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.ListM
     
 class GraphViewSet(mixins.CreateModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin, mixins.RetrieveModelMixin,GenericViewSet):
     serializer_class = GraphSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return (Graph.objects.filter(page__team__members=self.request.user) | Graph.objects.filter(page__team__admin=self.request.user)).distinct()
+        return Graph.objects.filter(page__team__members=self.request.user)
+    
+    def get_permissions(self):
+        if self.action == 'create' or self.action == 'options' :
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsGraphAdmin() ]
     
 class DataArrayViewSet(mixins.CreateModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,GenericViewSet):
     serializer_class = DataArraySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsDataArrayAdmin]
 
     def get_queryset(self):
-        return (DataArray.objects.filter(graph__page__team__members=self.request.user) | DataArray.objects.filter(graph__page__team__admin=self.request.user)).distinct()
+        return DataArray.objects.filter(graph__page__team__members=self.request.user)
     
 class DataPointViewSet(mixins.CreateModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,GenericViewSet):
     serializer_class = DataPointSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsDataPointAdmin]
 
     def get_queryset(self):
-        return (DataPoint.objects.filter(data_array__graph__page__team__members=self.request.user) | DataPoint.objects.filter(data_array__graph__page__team__admin=self.request.user)).distinct()
+        return DataPoint.objects.filter(data_array__graph__page__team__members=self.request.user)
     
 class StaticGraphTypeView(APIView):
     permission_classes = [IsAuthenticated]

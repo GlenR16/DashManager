@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { EyeIcon, PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/16/solid";
 import { NavLink } from "react-router-dom";
 import { UserContextType, useUser } from "../contexts/UserContext";
-import { UserCircleIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { CalendarDaysIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import Error from "./Error";
 import Loading from "./Loading";
 import DeleteTeamModal from "../components/DeleteTeamModal";
@@ -21,7 +21,7 @@ const teamStyles = [
 ]
 
 export default function Dashboard(): React.ReactElement {
-    const { user, updateUser }: { user: UserContextType, updateUser: (user: UserContextType) => Promise<void> } = useUser();
+    const { updateUser }: { user: UserContextType, updateUser: (user: UserContextType) => Promise<void> } = useUser();
     const axios: AxiosInstance = useAxiosAuth();
     const [teams, setTeams] = useState<Team[]>([]);
     const [deleteTeamModalProps, setDeleteTeamModalProps] = useState<any>({
@@ -106,10 +106,8 @@ export default function Dashboard(): React.ReactElement {
                                                     {team.name}
                                                 </div>
                                                 <div className="flex flex-row items-center gap-1 mb-1">
-                                                    <UserCircleIcon className="w-6 h-6" />
-                                                    <div>
-                                                        {team.admin.name}
-                                                    </div>
+                                                    <CalendarDaysIcon className="w-6 h-6" />
+                                                    {new Date(team.created_at).toLocaleDateString()}
                                                 </div>
                                             </div>
                                             <div className="w-full">
@@ -118,7 +116,7 @@ export default function Dashboard(): React.ReactElement {
                                                     <EyeIcon className="w-5 h-5" />
                                                 </NavLink>
                                                 {
-                                                    team.admin.id === user.id ? (
+                                                    team.is_admin ? (
                                                         <div className="card-actions w-full flex flex-row items-center justify-center gap-2">
                                                             <NavLink to={"/team/" + team.id + "/edit"} className="btn btn-primary grow min-h-8 h-8">
                                                                 Edit

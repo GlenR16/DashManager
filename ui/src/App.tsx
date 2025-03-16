@@ -1,4 +1,4 @@
-import { createHashRouter, RouterProvider } from 'react-router-dom'
+import { createHashRouter, Outlet, RouterProvider } from 'react-router-dom'
 import './App.css'
 import Root from './pages/Root'
 import Error from './pages/Error'
@@ -49,7 +49,7 @@ const router = createHashRouter([
                 element: <Suspense fallback={<Loading />}><CreateTeam /></Suspense>
             },
             {
-                path: "team/:id",
+                path: "team/:teamId",
                 element: <Suspense fallback={<Loading />}><TeamDetailRoot /></Suspense>,
                 children: [
                     {
@@ -60,24 +60,24 @@ const router = createHashRouter([
                         path: "edit",
                         element: <Suspense fallback={<Loading />}><EditTeam /></Suspense>
                     },
+                    {
+                        path: "page/create",
+                        element: <Suspense fallback={<Loading />}><CreatePage /></Suspense>
+                    },
+                    {
+                        path: "page/:pageId/edit",
+                        element: <Suspense fallback={<Loading />}><EditPage /></Suspense>
+                    },
+                    {
+                        path: "page/:pageId/graph/create",
+                        element: <Suspense fallback={<Loading />}><CreateGraph /></Suspense>
+                    },
+                    {
+                        path: "page/:pageId/graph/:graphId/edit",
+                        element: <Suspense fallback={<Loading />}><EditGraph /></Suspense>
+                    }
                 ]
             },
-            {
-                path: "page/create/team/:teamId",
-                element: <Suspense fallback={<Loading />}><CreatePage /></Suspense>
-            },
-            {
-                path: "page/:id/edit",
-                element: <Suspense fallback={<Loading />}><EditPage /></Suspense>
-            },
-            {
-                path: "graph/create/page/:pageId",
-                element: <Suspense fallback={<Loading />}><CreateGraph /></Suspense>
-            },
-            {
-                path: "graph/:id/edit",
-                element: <Suspense fallback={<Loading />}><EditGraph /></Suspense>
-            }
         ]
     }
 ])

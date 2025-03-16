@@ -122,7 +122,7 @@ export default function CreateTeam(): React.ReactElement {
                                 <PlusIcon className="w-6 h-6" />
                             </button>
                             <div className="card-actions justify-end">
-                                <SubmitButton label="Create Team" onClick={submitEntireForm} style="btn btn-primary min-h-10 h-10 btn-block" />
+                                <SubmitButton label="Create Team" onClick={submitEntireForm} style="btn-primary btn-block" />
                             </div>
                         </div>
                     </div>

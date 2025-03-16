@@ -2,16 +2,6 @@ import { NavigateFunction, NavLink, useNavigate } from "react-router-dom";
 import { UserContextType, useUser } from "../contexts/UserContext";
 import { HomeIcon, PresentationChartLineIcon } from "@heroicons/react/24/solid";
 
-function NameToAvatar(name: string): string {
-    if (!name || name === "") {
-        return "";
-    }
-    if (name.split(" ").length === 1) {
-        return name[0].toUpperCase();
-    }
-    return name.split(" ")[0][0].toUpperCase() + name.split(" ")[1][0].toUpperCase();
-}
-
 export default function Navbar(): React.ReactElement {
     const { user, clearUser }: { user : UserContextType | null, clearUser: () => Promise<void>} = useUser();
     const navigate: NavigateFunction = useNavigate();
@@ -83,7 +73,8 @@ export default function Navbar(): React.ReactElement {
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar border-2 border-primary w-9 h-9">
                                 <div className="w-9 bg-base-100 rounded-full pt-[0.44rem] ">
                                     {
-                                        user && user.name && NameToAvatar(user.name)
+                                        user && user.name && 
+                                        user.name.split(" ")[0][0].toUpperCase() + user.name.split(" ")[1][0].toUpperCase()               
                                     }
                                 </div>
                             </div>
@@ -103,7 +94,7 @@ export default function Navbar(): React.ReactElement {
                             </ul>
                         </div>
                         :
-                        <NavLink to="/login" className="btn btn-dash btn-primary min-h-8 h-8">Login</NavLink>
+                        <NavLink to="/login" className={({ isActive }) => isActive ? "btn btn-primary min-h-8 h-8" : "btn btn-dash btn-primary min-h-8 h-8"} >Login</NavLink>
                 }
             </div>
         </div>

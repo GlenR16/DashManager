@@ -14,8 +14,8 @@ export default function DeleteGraphModal({ deleteGraphId, deleteGraphName, refre
 
     async function deleteGraph() {
         return axios.delete("/graph/" + deleteGraphId)
-            .then(() => {
-                refreshData();
+            .then(async () => {
+                await refreshData();
                 (document.getElementById("deleteGraphModal") as any)?.close();
             })
             .catch((error) => {

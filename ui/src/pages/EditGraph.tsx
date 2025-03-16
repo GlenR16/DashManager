@@ -1,40 +1,82 @@
-import { NavLink, useParams } from "react-router-dom";
-import SubmitButton from "../components/SubmitButton";
-import { ChartBarIcon, DocumentChartBarIcon, UserGroupIcon } from "@heroicons/react/24/solid";
 import { AxiosInstance } from "axios";
-import useAxiosAuth from "../utils/ApiProvider";
+import SubmitButton from "../components/SubmitButton";
 import { useEffect, useState } from "react";
+import useAxiosAuth from "../utils/ApiProvider";
+import { useOutletContext, useParams } from "react-router-dom";
+import Graph from "../models/Graph";
+import Team from "../models/Team";
+import { PencilIcon, PlusCircleIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import DataArrays from "../models/DataArray";
+import DataPoint from "../models/DataPoint";
+import AddDataPointModal from "../components/AddDataPointModal";
 
 export default function EditGraph(): React.ReactElement {
-    const graphId = useParams().id;
+    const { team } = useOutletContext() as { team: Team };
+    const graphId = useParams().graphId as string;
     const axios: AxiosInstance = useAxiosAuth();
+    const [selectedDataArrayId, setSelectedDataArrayId] = useState<number>(0);
 
-    // const [graph, setGraph] = useState<any>(null);
-    const [page, setPage] = useState<any>(null);
-    const [team, setTeam] = useState<any>(null);
+    const [graph, setGraph] = useState<Graph>({
+        id: 0,
+        page: 0,
+        title: "",
+        description: "",
+        is_enabled: false,
+        type: "",
+        size: "",
+        order: 0,
+        data_arrays: [],
+        meta: {},
+
+        created_at: new Date(),
+        updated_at: new Date()
+    });
 
     async function refreshData() {
         return axios.get("/graph/" + graphId)
-            .then(async (response) => {
-                // setGraphForm(response.data);
-                return axios.get("/page/" + response.data.page)
-                    .then(async (response) => {
-                        setPage(response.data);
-                        return axios.get("/team/" + response.data.team)
-                            .then((response) => {
-                                setTeam(response.data);
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                            });
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                    });
+            .then((response) => {
+                setGraph(response.data);
             })
             .catch((error) => {
                 console.error(error);
             });
+    }
+
+    async function addDataArray() {
+        return axios.post("/data_array", {
+            graph: graph.id
+        })
+            .then(() => {
+                refreshData();
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    async function deleteDataArray(data_array_id: number) {
+        return axios.delete("/data_array/" + data_array_id)
+            .then(() => {
+                refreshData();
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    async function deleteDataPoint(data_point_id: number) {
+        return axios.delete("/data_point/" + data_point_id)
+            .then(() => {
+                refreshData();
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    function showAddDataPointModal(data_array_id: number) {
+        setSelectedDataArrayId(data_array_id);
+        (document.getElementById("addDataPointModal") as any)?.showModal()
     }
 
     useEffect(() => {
@@ -43,36 +85,7 @@ export default function EditGraph(): React.ReactElement {
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex flex-row items-center justify-between w-full bg-primary text-primary-content px-4">
-                <div className="breadcrumbs text-sm">
-                    <ul>
-                        <li>
-                            <NavLink to={"/dashboard"}>
-                                <ChartBarIcon className="w-4 h-4" />
-                                Dashboard
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to={`/team/${page?.team}`} className="inline-flex items-center gap-2">
-                                <UserGroupIcon className="w-4 h-4" />
-                                {team?.name}
-                            </NavLink>
-                        </li>
-                        <li>
-                            <span className="inline-flex items-center gap-2 not-a-link">
-                                <DocumentChartBarIcon className="w-4 h-4" />
-                                {page?.title}
-                            </span>
-                        </li>
-                        <li>
-                            <span className="inline-flex items-center gap-2 not-a-link">
-                                <ChartBarIcon className="w-4 h-4" />
-                                Edit Graph Data
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+            <AddDataPointModal data_array_id={selectedDataArrayId} refreshData={refreshData} />
             <div className="p-4 flex flex-col gap-4">
                 <div className="text-2xl font-semibold text-center">
                     Edit Graph Data
@@ -80,12 +93,86 @@ export default function EditGraph(): React.ReactElement {
                 <div className="pb-4">
                     <div className="card bg-base-300 shadow-sm">
                         <div className="card-body">
-                            <h2 className="card-title text-2xl">Graph Data</h2>
-                            <div className="flex flex-col gap-4">
-                                
+                            <h2 className="card-title text-2xl justify-between">
+                                Graph Data
+                                {
+                                    team.is_admin &&
+                                    <SubmitButton label="Add Data Array" onClick={addDataArray} icon={<PlusCircleIcon className="w-6 h-6" />} />
+                                }
+                            </h2>
+                            <div className="flex flex-col gap-4 py-2">
+                                {
+                                    graph.data_arrays.map((data_array: DataArrays, index: number) => {
+                                        return (
+                                            <div key={index} className="overflow-x-auto rounded-box border border-base-content/5">
+                                                <table className="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th colSpan={4}>
+                                                                <div className="flex flex-row justify-between">
+                                                                    <span className="text-lg text-base-content">
+                                                                        Data Array {index + 1}
+                                                                    </span>
+                                                                    <div className="flex flex-row gap-2">
+                                                                        <button className="btn btn-primary min-h-8 h-8" onClick={() => showAddDataPointModal(data_array.id)}>
+                                                                            <PlusIcon className="w-4 h-4" />
+                                                                        </button>
+                                                                        <button className="btn btn-error min-h-8 h-8" onClick={() => deleteDataArray(data_array.id)}>
+                                                                            <TrashIcon className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Index</th>
+                                                            <th>Object</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {
+                                                            data_array.data_points.length > 0 ?
+                                                            data_array.data_points.map((data_point: DataPoint, index: number) => {
+                                                                return (
+                                                                    <tr key={index}>
+                                                                        <th className="w-14">{index + 1}</th>
+                                                                        <td>
+                                                                            {JSON.stringify(data_point.object)}
+                                                                        </td>
+                                                                        <td className="w-32">
+                                                                            <div className="flex flex-row gap-2">
+                                                                                <button className="btn btn-primary min-h-8 h-8">
+                                                                                    <PencilIcon className="w-4 h-4" />
+                                                                                </button>
+                                                                                <button className="btn btn-error min-h-8 h-8" onClick={() => deleteDataPoint(data_point.id)}>
+                                                                                    <TrashIcon className="w-4 h-4" />
+                                                                                </button>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })
+                                                            :
+                                                            <tr>
+                                                                <td colSpan={3} className="text-center">
+                                                                    No data points added yet
+                                                                </td>
+                                                            </tr>
+                                                        }
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        );
+                                    })
+                                }
                             </div>
                             <div className="card-actions justify-end mt-2">
-                                <SubmitButton label="Save" onClick={() => Promise.resolve()} style="btn btn-primary min-h-10 h-10 btn-block" />
+                                <SubmitButton label="Save" onClick={() => Promise.resolve()} style="btn-primary btn-block" />
                             </div>
                         </div>
                     </div>

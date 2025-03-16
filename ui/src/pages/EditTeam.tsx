@@ -9,7 +9,7 @@ import { NavigateFunction, useNavigate, useParams } from "react-router-dom";
 import KeyField from "../components/KeyField";
 
 export default function EditTeam(): React.ReactElement {
-    const teamId = useParams().id;
+    const teamId = useParams().teamId as string;
     const axios: AxiosInstance = useAxiosAuth();
     const navigate: NavigateFunction = useNavigate();
 
@@ -111,7 +111,7 @@ export default function EditTeam(): React.ReactElement {
                         ))
                     }
                     <div className="card-actions justify-end">
-                        <SubmitButton label="Save" onClick={submitEntireForm} style="btn btn-primary min-h-10 h-10 btn-block" />
+                        <SubmitButton label="Save" onClick={submitEntireForm} style="btn-primary btn-block" />
                     </div>
                 </div>
             </div>

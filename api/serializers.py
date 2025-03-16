@@ -2,19 +2,12 @@ from rest_framework import serializers
 
 from api.models import DataArray, DataPoint, Graph, Page, User, Team
 
-class UserSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','email','name','password','is_staff','is_active','is_superuser','last_login','created_at','updated_at']
+        fields = ['email','name','password']
         extra_kwargs = {
-            'id': {'read_only': True},
             'password': {'write_only': True},
-            'is_staff': {'read_only': True},
-            'is_active': {'read_only': True},
-            'is_superuser': {'read_only': True},
-            'last_login': {'read_only': True},
-            'created_at': {'read_only': True},
-            'updated_at': {'read_only': True},
         }
     
     def create(self, validated_data):
@@ -22,28 +15,55 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','email','name','is_staff','is_active','is_superuser','last_login','created_at','updated_at']
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'email': {'read_only': True},
+            'is_staff': {'read_only': True},
+            'is_active': {'read_only': True},
+            'is_superuser': {'read_only': True},
+            'last_login': {'read_only': True},
+            'created_at': {'read_only': True},
+            'updated_at': {'read_only': True},
+        }
+
+class UserPasswordUpdateSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
     
     def update(self, instance, validated_data):
-        _ = validated_data.pop('email', None)
-        password = validated_data.pop('password', None)
-        if password:
-            instance.set_password(password)
-        instance.name = validated_data.pop('name', instance.name)
+        if not instance.check_password(validated_data['old_password']):
+            raise serializers.ValidationError("Old password is incorrect.")
+        instance.set_password(validated_data['new_password'])
         instance.save()
         return instance
 
 class TeamSerializer(serializers.ModelSerializer):
-    admin = UserSerializer(read_only=True)
+    admins = UserSerializer(many=True, read_only=True)
     members = UserSerializer(many=True, read_only=True)
+    is_admin = serializers.SerializerMethodField()
+
+    def get_is_admin(self, obj):
+        return obj.admins.filter(pk=self.context['request'].user.pk).exists()
 
     class Meta:
         model = Team
-        fields = ['id','name','admin','invite_code','members','created_at','updated_at']
+        fields = ['id','name','admins','members','is_admin','invite_code','created_at','updated_at']
         extra_kwargs = {
             'id': {'read_only': True},
-            'admin': {'read_only': True},
-            'invite_code': {'read_only': True},
+            'admins': {'read_only': True},
             'members': {'read_only': True},
+            'invite_code': {'read_only': True},
             'created_at': {'read_only': True},
             'updated_at': {'read_only': True},
         }

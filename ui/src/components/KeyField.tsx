@@ -13,7 +13,7 @@ export default function KeyField({ secretKey, refreshTeamData }: KeyFieldProps):
 	const [show, setShow] = useState(false);
 	const [copied, setCopied] = useState(false);
 	const [apikey, setApikey] = useState(secretKey);
-	const teamId = useParams().id;
+	const teamId = useParams().teamId as string;
 	const axios: AxiosInstance = useAxiosAuth();
 
 	function copyToClipboard() {

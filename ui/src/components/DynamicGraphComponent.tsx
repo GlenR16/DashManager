@@ -45,7 +45,13 @@ export default function DynamicGraphComponent({ graph }: DynamicGraphComponentPr
     return (
         <div className={graph.size == "FULL" ? baseClass + " col-span-1 md:col-span-2" : baseClass + " col-span-1"}>
             <div className="flex flex-row items-center justify-between ps-2 pb-1">
-                <div className="font-semibold">{graph.title}</div>
+                <div className="font-semibold flex flex-row items-center gap-2">
+                    {graph.title}
+                    {
+                        new Date(graph.created_at) > new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7) &&
+                        <span className="badge badge-xs badge-accent">New</span>
+                    }
+                </div>
                 <div className="flex flex-row items-center gap-2">
                     <div className="tooltip tooltip-left" data-tip={graph.description} >
                         <InformationCircleIcon className="w-6 h-6" />

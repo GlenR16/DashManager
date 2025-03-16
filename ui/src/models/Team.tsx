@@ -1,9 +1,12 @@
+import User from "./User";
+
 export default interface Team {
     id: number;
     name: string;
-    admin: any,
     invite_code: string;
-    members: any[];
+    is_admin: boolean;
+    members: User[];
+    admins: User[];
     
     created_at: Date;
     updated_at: Date;
