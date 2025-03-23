@@ -6,7 +6,7 @@ import Error from "./Error";
 import { useOutletContext } from "react-router-dom";
 
 export default function Team(): React.ReactElement {
-    const { selectedPage } = useOutletContext() as { selectedPage: Page };
+    const { selectedPage, refreshBaseData } = useOutletContext() as { selectedPage: Page, refreshBaseData: () => Promise<void> };
 
     return (
 
@@ -17,12 +17,12 @@ export default function Team(): React.ReactElement {
                         {
                             selectedPage.graphs.filter((graph: Graph) => graph.is_enabled).length > 0 ?
                                 (
-                                    <div className="grid grid-flow-row gap-2 grid-cols-1 md:grid-cols-2">
+                                    <div className="grid grid-flow-row gap-2 grid-cols-1 md:grid-cols-2 pb-4">
                                         {
                                             selectedPage.graphs.sort((a, b) => a.order - b.order).filter((graph: Graph) => graph.is_enabled)
                                                 .map((graph: Graph, index: number) => {
                                                     return (
-                                                        <DynamicGraphComponent key={index} graph={graph} />
+                                                        <DynamicGraphComponent key={index} graph={graph} refreshBaseData={refreshBaseData} />
                                                     );
                                                 })
                                         }

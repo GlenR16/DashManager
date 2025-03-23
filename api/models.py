@@ -56,6 +56,9 @@ class Graph(models.Model):
     LINE_CHART = "LINE_CHART"
     BAR_CHART = "BAR_CHART"
     PIE_CHART = "PIE_CHART"
+    AREA_CHART = "AREA_CHART"
+    RADAR_CHART = "RADAR_CHART"
+    TABLE = "TABLE"
 
     NORMAL = "NORMAL"
     FULL = "FULL"
@@ -69,6 +72,9 @@ class Graph(models.Model):
         (LINE_CHART,_("Line Chart")),
         (BAR_CHART,_("Bar Chart")),
         (PIE_CHART,_("Pie Chart")),
+        (AREA_CHART,_("Area Chart")),
+        (RADAR_CHART,_("Radar Chart")),
+        (TABLE,_("Table")),
     ]
 
     title = models.CharField(_("Title"),max_length=255)
@@ -104,3 +110,14 @@ class DataPoint(models.Model):
 
     def __str__(self):
         return f"Data Point for {self.data_array.graph.title}"
+    
+class Comment(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comments")
+    graph = models.ForeignKey(Graph,on_delete=models.CASCADE,related_name="comments")
+    content = models.TextField(_("Content"))
+
+    created_at = models.DateTimeField(_("Created At"),auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated At"),auto_now=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.name} on {self.graph.title}"

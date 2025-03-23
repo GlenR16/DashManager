@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { EyeIcon, PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/16/solid";
 import { NavLink } from "react-router-dom";
 import { UserContextType, useUser } from "../contexts/UserContext";
-import { CalendarDaysIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { CalendarDaysIcon, UserPlusIcon, UsersIcon } from "@heroicons/react/24/solid";
 import Error from "./Error";
 import Loading from "./Loading";
 import DeleteTeamModal from "../components/DeleteTeamModal";
 import Team from "../models/Team";
 import JoinTeamModal from "../components/JoinTeamModal";
+import moment from "moment";
 
 const teamStyles = [
     { "backgroundImage": "linear-gradient(131deg, rgba(186, 186, 186, 0.01) 0%, rgba(186, 186, 186, 0.01) 16.667%,rgba(192, 192, 192, 0.01) 16.667%, rgba(192, 192, 192, 0.01) 33.334%,rgba(48, 48, 48, 0.01) 33.334%, rgba(48, 48, 48, 0.01) 50.001000000000005%,rgba(33, 33, 33, 0.01) 50.001%, rgba(33, 33, 33, 0.01) 66.668%,rgba(182, 182, 182, 0.01) 66.668%, rgba(182, 182, 182, 0.01) 83.33500000000001%,rgba(211, 211, 211, 0.01) 83.335%, rgba(211, 211, 211, 0.01) 100.002%),linear-gradient(148deg, rgba(48, 48, 48, 0.01) 0%, rgba(48, 48, 48, 0.01) 16.667%,rgba(178, 178, 178, 0.01) 16.667%, rgba(178, 178, 178, 0.01) 33.334%,rgba(192, 192, 192, 0.01) 33.334%, rgba(192, 192, 192, 0.01) 50.001000000000005%,rgba(237, 237, 237, 0.01) 50.001%, rgba(237, 237, 237, 0.01) 66.668%,rgba(194, 194, 194, 0.01) 66.668%, rgba(194, 194, 194, 0.01) 83.33500000000001%,rgba(227, 227, 227, 0.01) 83.335%, rgba(227, 227, 227, 0.01) 100.002%),linear-gradient(138deg, rgba(146, 146, 146, 0.03) 0%, rgba(146, 146, 146, 0.03) 25%,rgba(33, 33, 33, 0.03) 25%, rgba(33, 33, 33, 0.03) 50%,rgba(46, 46, 46, 0.03) 50%, rgba(46, 46, 46, 0.03) 75%,rgba(172, 172, 172, 0.03) 75%, rgba(172, 172, 172, 0.03) 100%),linear-gradient(38deg, rgba(3, 3, 3, 0.03) 0%, rgba(3, 3, 3, 0.03) 16.667%,rgba(28, 28, 28, 0.03) 16.667%, rgba(28, 28, 28, 0.03) 33.334%,rgba(236, 236, 236, 0.03) 33.334%, rgba(236, 236, 236, 0.03) 50.001000000000005%,rgba(3, 3, 3, 0.03) 50.001%, rgba(3, 3, 3, 0.03) 66.668%,rgba(207, 207, 207, 0.03) 66.668%, rgba(207, 207, 207, 0.03) 83.33500000000001%,rgba(183, 183, 183, 0.03) 83.335%, rgba(183, 183, 183, 0.03) 100.002%),linear-gradient(145deg, rgba(20, 20, 20, 0.02) 0%, rgba(20, 20, 20, 0.02) 20%,rgba(4, 4, 4, 0.02) 20%, rgba(4, 4, 4, 0.02) 40%,rgba(194, 194, 194, 0.02) 40%, rgba(194, 194, 194, 0.02) 60%,rgba(34, 34, 34, 0.02) 60%, rgba(34, 34, 34, 0.02) 80%,rgba(71, 71, 71, 0.02) 80%, rgba(71, 71, 71, 0.02) 100%),linear-gradient(78deg, rgba(190, 190, 190, 0.02) 0%, rgba(190, 190, 190, 0.02) 20%,rgba(95, 95, 95, 0.02) 20%, rgba(95, 95, 95, 0.02) 40%,rgba(71, 71, 71, 0.02) 40%, rgba(71, 71, 71, 0.02) 60%,rgba(7, 7, 7, 0.02) 60%, rgba(7, 7, 7, 0.02) 80%,rgba(130, 130, 130, 0.02) 80%, rgba(130, 130, 130, 0.02) 100%),linear-gradient(293deg, rgba(213, 213, 213, 0.03) 0%, rgba(213, 213, 213, 0.03) 20%,rgba(220, 220, 220, 0.03) 20%, rgba(220, 220, 220, 0.03) 40%,rgba(146, 146, 146, 0.03) 40%, rgba(146, 146, 146, 0.03) 60%,rgba(57, 57, 57, 0.03) 60%, rgba(57, 57, 57, 0.03) 80%,rgba(120, 120, 120, 0.03) 80%, rgba(120, 120, 120, 0.03) 100%),linear-gradient(90deg, rgb(225, 15, 180),rgb(78, 198, 243))" },
@@ -74,7 +75,7 @@ export default function Dashboard(): React.ReactElement {
         <div className="h-full flex flex-col p-4">
             <DeleteTeamModal deleteTeamId={deleteTeamModalProps.deleteTeamId} deleteTeamName={deleteTeamModalProps.deleteTeamName} refreshData={refreshData} />
             <JoinTeamModal refreshData={refreshData} />
-            <div className="m-2">
+            <div className="h-full">
                 <div className="flex flex-row items-center justify-between">
                     <h1 className="text-2xl font-semibold">Teams</h1>
                     <div className="flex flex-col sm:flex-row gap-2">
@@ -88,60 +89,68 @@ export default function Dashboard(): React.ReactElement {
                         </button>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                    {
-                        isLoading ?
-                            <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                                <Loading />
+                {
+                    isLoading ?
+                        <Loading />
+                        :
+                        teams.length > 0 ?
+                            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+
+                                {
+                                    teams.map((team: any, index: number) => {
+                                        console.log(team);
+                                        return (
+                                            <div className="card bg-base-100 image-full w-full shadow-sm" key={index}>
+                                                <figure>
+                                                    <div className="h-full w-full" style={teamStyles[index % teamStyles.length]}></div>
+                                                </figure>
+                                                <div className="card-body w-full">
+                                                    <div className="flex flex-row items-center justify-between w-full">
+                                                        <div className="card-title text-3xl">
+                                                            {team.name}
+                                                        </div>
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex flex-row items-end gap-1">
+                                                                <CalendarDaysIcon className="w-6 h-6" />
+                                                                {moment(new Date(team.created_at)).format("MMM Do YYYY")}
+                                                            </div>
+                                                            <div className="flex flex-row items-end gap-1">
+                                                                <UsersIcon className="w-6 h-6" />
+                                                                {team.members.length} Members
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-full">
+                                                        <NavLink to={"/team/" + team.id} className="btn btn-primary grow min-h-8 h-8 my-2 w-full">
+                                                            View
+                                                            <EyeIcon className="w-5 h-5" />
+                                                        </NavLink>
+                                                        {
+                                                            team.is_admin ? (
+                                                                <div className="card-actions w-full flex flex-row items-center justify-center gap-2">
+                                                                    <NavLink to={"/team/" + team.id + "/edit"} className="btn btn-primary grow min-h-8 h-8">
+                                                                        Edit
+                                                                        <PencilIcon className="w-5 h-5" />
+                                                                    </NavLink>
+                                                                    <button className="btn btn-primary grow min-h-8 h-8" onClick={() => showDeleteModal(team.id)}>
+                                                                        Delete
+                                                                        <TrashIcon className="w-5 h-5" />
+                                                                    </button>
+                                                                </div>
+                                                            )
+                                                                : <></>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                             </div>
                             :
-                            teams.length > 0 ? teams.map((team: any, index: number) => {
-                                return (
-                                    <div className="card bg-base-100 image-full w-full shadow-sm" key={index}>
-                                        <figure>
-                                            <div className="h-full w-full" style={teamStyles[index % teamStyles.length]}></div>
-                                        </figure>
-                                        <div className="card-body w-full">
-                                            <div className="flex flex-row items-end justify-between w-full">
-                                                <div className="card-title text-3xl">
-                                                    {team.name}
-                                                </div>
-                                                <div className="flex flex-row items-center gap-1 mb-1">
-                                                    <CalendarDaysIcon className="w-6 h-6" />
-                                                    {new Date(team.created_at).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                            <div className="w-full">
-                                                <NavLink to={"/team/" + team.id} className="btn btn-primary grow min-h-8 h-8 my-2 w-full">
-                                                    View
-                                                    <EyeIcon className="w-5 h-5" />
-                                                </NavLink>
-                                                {
-                                                    team.is_admin ? (
-                                                        <div className="card-actions w-full flex flex-row items-center justify-center gap-2">
-                                                            <NavLink to={"/team/" + team.id + "/edit"} className="btn btn-primary grow min-h-8 h-8">
-                                                                Edit
-                                                                <PencilIcon className="w-5 h-5" />
-                                                            </NavLink>
-                                                            <button className="btn btn-primary grow min-h-8 h-8" onClick={() => showDeleteModal(team.id)}>
-                                                                Delete
-                                                                <TrashIcon className="w-5 h-5" />
-                                                            </button>
-                                                        </div>
-                                                    )
-                                                        : <></>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                                :
-                                <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-4">
-                                    <Error message="No teams found" />
-                                </div>
-                    }
-                </div>
+                            <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-4">
+                                <Error message="No teams found" />
+                            </div>
+                }
             </div>
         </div>
     )

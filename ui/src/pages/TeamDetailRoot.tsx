@@ -56,78 +56,80 @@ export default function TeamDetailRoot(): React.ReactElement {
     }, []);
 
     return (
-        <div className="drawer h-full overflow-hidden">
-            <DeletePageModal deletePageId={deletePageId} deletePageName={pages.filter((page: Page) => page.id == deletePageId)[0]?.title} refreshData={refreshBaseData} />
-            <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-            <div className="drawer-content flex flex-col items-center justify-center h-full overflow-y-scroll">
-                <div className="flex flex-row items-center justify-between w-full bg-primary text-primary-content px-4">
-                    <BreadCrumbs pathname={pathname} team={team} pages={pages} selectedPage={selectedPage} />
-                    {
-                        selectedPage && selectedPage.description && !pathname.includes("edit") &&
-                        <div className="tooltip tooltip-left">
-                            <div className="tooltip-content max-w-120 w-120">
-                                {selectedPage.description}
-                            </div>
-                            <InformationCircleIcon className="w-6 h-6" />
-                        </div>
-                    }
-                </div>
-                <div className="h-full w-full overflow-y-scroll">
-                    <Outlet context={{ team, selectedPage, refreshBaseData }} />
-                </div>
-                {
-                    !pathname.includes("edit") &&
-                    <label htmlFor="my-drawer-2" className="btn btn-circle btn-accent min-h-11 h-11 w-11 drawer-button absolute bottom-6 right-5 z-50">
-                        <Square3Stack3DIcon className="w-6 h-6" />
-                    </label>
-                }
-            </div>
-            <div className="drawer-side h-full">
-                <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-                <ul className="menu menu-lg bg-base-200 text-base-content min-h-full w-80 p-4 gap-1">
-                    <div className="flex flex-row items-center justify-between ms-2">
-                        <div className="text-xl font-semibold">Pages</div>
+        <>
+            {
+                !pathname.includes("edit") &&
+                <label htmlFor="my-drawer-2" className="btn btn-circle btn-accent min-h-11 h-11 w-11 drawer-button absolute bottom-6 right-5 z-50">
+                    <Square3Stack3DIcon className="w-6 h-6" />
+                </label>
+            }
+            <div className="drawer">
+                <DeletePageModal deletePageId={deletePageId} deletePageName={pages.filter((page: Page) => page.id == deletePageId)[0]?.title} refreshData={refreshBaseData} />
+                <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+                <div className="drawer-content flex flex-col items-center justify-center">
+                    <div className="flex flex-row items-center justify-between w-full bg-primary text-primary-content px-4">
+                        <BreadCrumbs pathname={pathname} team={team} pages={pages} selectedPage={selectedPage} />
                         {
-                            team.is_admin &&
-                            <NavLink to={`/team/${teamId}/page/create`} className="btn btn-primary min-h-8 h-8" >
-                                Add Page
-                                <PlusCircleIcon className="w-5 h-5" />
-                            </NavLink>
+                            selectedPage && selectedPage.description && !pathname.includes("edit") &&
+                            <div className="tooltip tooltip-left">
+                                <div className="tooltip-content max-w-120">
+                                    {selectedPage.description}
+                                </div>
+                                <InformationCircleIcon className="w-6 h-6" />
+                            </div>
                         }
                     </div>
-                    <div className="divider p-0 m-0"></div>
-                    {
-                        isLoading ?
-                            <Loading />
-                            :
-                            (
-                                pages.length > 0 ?
-                                    pages.map((page: Page, index: number) => {
-                                        return (
-                                            <li key={index} className="flex flex-row w-full h-10 join join-horizontal">
-                                                <button className={selectedPage?.id == page.id ? `menu-active menu-disabled grow ${team.is_admin ? "rounded-r-none" : ""}` : "grow"} onClick={() => setSelectedPage(page)}>
-                                                    {page.title.length > 14 ? page.title.slice(0, 14) + "..." : page.title}
-                                                </button>
-                                                {
-                                                    selectedPage?.id == page.id && team.is_admin &&
-                                                    <>
-                                                        <NavLink to={`/team/${teamId}/page/${page.id}/edit`} className="btn btn-primary rounded-l-none rounded-r-none min-h-8 h-full">
-                                                            <PencilIcon className="w-5 h-5" />
-                                                        </NavLink>
-                                                        <button className="btn btn-error rounded-l-none rounded-r-md min-h-8 h-full" onClick={() => showDeletePageModal(page.id)}>
-                                                            <TrashIcon className="w-5 h-5" />
-                                                        </button>
-                                                    </>
-                                                }
-                                            </li>
-                                        );
-                                    })
-                                    :
-                                    <Error message="No pages found" />
-                            )
-                    }
-                </ul>
+                    <div className="grow w-full">
+                        <Outlet context={{ team, selectedPage, refreshBaseData }} />
+                    </div>
+                </div>
+                <div className="drawer-side h-full">
+                    <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
+                    <ul className="menu menu-lg bg-base-200 text-base-content min-h-full w-80 p-4 gap-1">
+                        <div className="flex flex-row items-center justify-between ms-2">
+                            <div className="text-xl font-semibold">Pages</div>
+                            {
+                                team.is_admin &&
+                                <NavLink to={`/team/${teamId}/page/create`} className="btn btn-primary min-h-8 h-8" >
+                                    Add Page
+                                    <PlusCircleIcon className="w-5 h-5" />
+                                </NavLink>
+                            }
+                        </div>
+                        <div className="divider p-0 m-0"></div>
+                        {
+                            isLoading ?
+                                <Loading />
+                                :
+                                (
+                                    pages.length > 0 ?
+                                        pages.map((page: Page, index: number) => {
+                                            return (
+                                                <li key={index} className="flex flex-row w-full h-10 join join-horizontal">
+                                                    <button className={selectedPage?.id == page.id ? `menu-active menu-disabled grow ${team.is_admin ? "rounded-r-none" : ""}` : "grow"} onClick={() => setSelectedPage(page)}>
+                                                        {page.title.length > 14 ? page.title.slice(0, 14) + "..." : page.title}
+                                                    </button>
+                                                    {
+                                                        selectedPage?.id == page.id && team.is_admin &&
+                                                        <>
+                                                            <NavLink to={`/team/${teamId}/page/${page.id}/edit`} className="btn btn-primary rounded-l-none rounded-r-none min-h-8 h-full">
+                                                                <PencilIcon className="w-5 h-5" />
+                                                            </NavLink>
+                                                            <button className="btn btn-error rounded-l-none rounded-r-md min-h-8 h-full" onClick={() => showDeletePageModal(page.id)}>
+                                                                <TrashIcon className="w-5 h-5" />
+                                                            </button>
+                                                        </>
+                                                    }
+                                                </li>
+                                            );
+                                        })
+                                        :
+                                        <Error message="No pages found" />
+                                )
+                        }
+                    </ul>
+                </div>
             </div>
-        </div>
+        </>
     )
 }

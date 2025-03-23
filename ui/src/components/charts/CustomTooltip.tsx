@@ -1,7 +1,7 @@
+import moment from "moment";
 
-
-function colorSelector(payload: any, chart: string): string{
-    if (chart === "LINE_CHART") {
+function colorSelector(payload: any, chart: string): string {
+    if (chart === "LINE_CHART" || chart === "AREA_CHART") {
         return payload.stroke;
     }
     else if (chart === "BAR_CHART") {
@@ -13,14 +13,21 @@ function colorSelector(payload: any, chart: string): string{
 export default function CustomTooltip(props: any): React.ReactNode | Promise<React.ReactNode> {
     if (props.active) {
         return (
-            <div className="bg-base-300 p-2 rounded-md">
-                <p className="text-lg font-semibold">{props.label}</p>
-                <div className="flex flex-col">
+            <div className="bg-base-300 p-2 rounded-md border border-primary">
+                <p className="font-semibold">
+                    {
+                        isNaN(new Date(props.label).getTime()) ?
+                            props.label
+                            :
+                            moment(props.label).format('lll')
+                    }
+                </p>
+                <div className="flex flex-col text-sm">
                     {
                         props.payload.map((pld: any, index: number) => (
-                            <div className="inline-flex gap-1" key={index}>
+                            <div className="inline-flex gap-1" key={index} style={{ color: `${colorSelector(pld, props.graph_type)}` }}>
                                 <div>{pld.dataKey}:</div>
-                                <div style={{ color: `${ colorSelector(pld, props.graph_type) }` }}>{pld.value}</div>
+                                <div>{pld.value}</div>
                             </div>
                         ))
                     }

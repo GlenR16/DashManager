@@ -15,7 +15,7 @@ export default function Navbar(): React.ReactElement {
     }
 
     return (
-        <div className="navbar bg-base-100 shadow-sm h-13 min-h-13 border-b-2 border-primary">
+        <div className="navbar bg-base-100 shadow-sm h-13 min-h-13 border-b-2 border-primary px-4">
             <div className="navbar-start gap-4">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-soft lg:hidden min-h-8 h-8 px-3">
@@ -44,7 +44,7 @@ export default function Navbar(): React.ReactElement {
                     </ul>
                 </div>
                 <div className="inline-flex flex-row gap-2 items-center justify-center">
-                    <a href="/" className="link no-underline text-lg">Dash Manager</a>
+                    <a href="/" className="link no-underline text-base md:text-lg">Dash Manager</a>
                     <ul className="menu menu-horizontal px-1 gap-1 hidden lg:flex">
                         <li>
                             <NavLink to="/" className={({ isActive }) => isActive ? "bg-primary min-h-8 h-8 menu-disabled text-primary-content" : "min-h-8 h-8"}>

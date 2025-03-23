@@ -6,6 +6,7 @@ import { AxiosInstance } from "axios";
 import useAxiosAuth from "../utils/ApiProvider";
 import { ClockIcon, ExclamationCircleIcon, KeyIcon } from "@heroicons/react/24/solid";
 import InputField from "../components/InputField";
+import moment from "moment";
 
 export default function Profile(): React.ReactElement {
     const { user, clearUser, updateUser }: { user: UserContextType, clearUser: () => Promise<void>, updateUser: (user: UserContextType) => Promise<void> } = useUser();
@@ -101,20 +102,22 @@ export default function Profile(): React.ReactElement {
                         <div className="card-body gap-4">
                             <SubmitButton label="Logout from this device" style="btn-warning" onClick={logout} />
                             <div className="stats shadow bg-base-100">
-                                <div className="stat">
+                                <div className="stat col-span-6">
                                     <div className="stat-figure text-primary">
                                         <ClockIcon className="inline-block h-8 w-8" />
                                     </div>
-                                    <div className="stat-title">Account Created At</div>
-                                    <div className="stat-desc text-lg">{new Date(user.created_at).toLocaleString()}</div>
+                                    <div className="stat-title">Account Created</div>
+                                    <div className="stat-desc text-lg">
+                                        {moment(user.created_at).from(moment(new Date()))}
+                                    </div>
                                 </div>
-                                <div className="stat">
+                                <div className="stat col-span-4">
                                     <div className="stat-figure text-secondary">
                                         <KeyIcon className="inline-block h-8 w-8" />
                                     </div>
                                     <div className="stat-title">Last Login</div>
                                     <div className="stat-desc text-lg">
-                                        {new Date(user.last_login).toLocaleString()}
+                                        {moment(user.last_login).from(moment(new Date()))}
                                     </div>
                                 </div>
                             </div>

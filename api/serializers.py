@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import DataArray, DataPoint, Graph, Page, User, Team
+from api.models import Comment, DataArray, DataPoint, Graph, Page, User, Team
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,6 +68,21 @@ class TeamSerializer(serializers.ModelSerializer):
             'updated_at': {'read_only': True},
         }
 
+class CommentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = Comment
+        fields = ['id','user','graph','content','created_at','updated_at']
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'user': {'read_only': True},
+            'graph': {'read_only': True},
+            'content': {'required': True},
+            'created_at': {'read_only': True},
+            'updated_at': {'read_only': True},
+        }
+
 class DataPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataPoint
@@ -96,10 +111,11 @@ class DataArraySerializer(serializers.ModelSerializer):
 
 class GraphSerializer(serializers.ModelSerializer):
     data_arrays = DataArraySerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Graph
-        fields = ['id','title','description','page','is_enabled','type','size','order','meta','data_arrays','created_at','updated_at']
+        fields = ['id','title','description','page','is_enabled','type','size','order','meta','data_arrays','comments','created_at','updated_at']
         extra_kwargs = {
             'id': {'read_only': True},
             'created_at': {'read_only': True},

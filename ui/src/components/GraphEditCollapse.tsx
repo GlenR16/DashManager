@@ -5,7 +5,7 @@ import { AxiosInstance } from 'axios';
 import useAxiosAuth from '../utils/ApiProvider';
 import InputField from './InputField';
 import EditorField from './EditorField';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
 import { NavLink, useParams } from 'react-router-dom';
 
 interface GraphEditCollapseProps {
@@ -171,7 +171,13 @@ export default function GraphEditCollapse({ graph, setDeleteGraphData, refreshDa
                             }
                         </SelectField>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                    <div className="flex flex-col items-center gap-1">
+                        <div role="alert" className="alert w-full">
+                            <InformationCircleIcon className="w-6 h-6" />
+                            <span>
+                                Meta field allows you to add additional information to the graph in JSON format. Current allowed fields include: "dataKeys": string[], "nameKeys": string[]
+                            </span>
+                        </div>
                         <EditorField label='Meta' name='meta' language='json' value={graphForm.meta} onChange={handleGraphEditorChange} error={graphFormErrors.meta} />
                     </div>
                 </div>

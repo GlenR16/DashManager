@@ -1,5 +1,3 @@
-from django.shortcuts import get_object_or_404
-from requests import delete
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,9 +5,9 @@ from rest_framework import status
 from rest_framework.permissions import  AllowAny,IsAuthenticated
 from rest_framework import mixins
 
-from api.models import DataArray, DataPoint, Graph, Page, Team, User, generate_invite_code
+from api.models import Comment, DataArray, DataPoint, Graph, Page, Team, generate_invite_code
 from api.permissions import IsDataArrayAdmin, IsDataPointAdmin, IsGraphAdmin, IsPageAdmin, IsTeamAdmin
-from api.serializers import DataArraySerializer, DataPointSerializer, GraphSerializer, PageSerializer, PageSerializerShort, TeamSerializer, UserSerializer, UserCreateSerializer, UserPasswordUpdateSerializer
+from api.serializers import CommentSerializer, DataArraySerializer, DataPointSerializer, GraphSerializer, PageSerializer, PageSerializerShort, TeamSerializer, UserSerializer, UserCreateSerializer, UserPasswordUpdateSerializer
 
 # Create your views here.
 class UserViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,GenericViewSet):
@@ -176,6 +174,22 @@ class DataPointViewSet(mixins.CreateModelMixin,mixins.UpdateModelMixin,mixins.De
     def get_queryset(self):
         return DataPoint.objects.filter(data_array__graph__page__team__members=self.request.user)
     
+class CommentViewSet(mixins.CreateModelMixin,mixins.DestroyModelMixin,GenericViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Comment.objects.filter(graph__page__team__members=self.request.user, user=self.request.user)
+    
+    def perform_create(self, serializer):
+        graph = Graph.objects.filter(pk=self.kwargs.get('pk', None)).first()
+        if graph is None or not graph.page.team.members.filter(pk=self.request.user.pk).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"graph": ["Invalid graph id."]})
+        serializer.save(user=self.request.user, graph=graph)
+
+    def get_object(self):
+        return self.get_queryset().filter(pk=self.kwargs.get('pk', None)).first()
+
 class StaticGraphTypeView(APIView):
     permission_classes = [IsAuthenticated]
 

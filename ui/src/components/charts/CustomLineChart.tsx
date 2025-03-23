@@ -1,16 +1,16 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import Graph from "../../models/Graph";
 import Error from "../../pages/Error";
 import CustomTooltip from "./CustomTooltip";
+import {ChartProps, COLORS, sortDataPoints} from "./ChartUtils";
 
-interface LineChartProps {
-    graph: Graph;
-}
-const colors: string[] = [ 'var(--color-secondary)', 'var(--color-accent)', 'var(--color-info)', 'var(--color-warning)', 'var(--color-success)', 'var(--color-error)' ];
 
-export default function CustomLineChart({ graph }: LineChartProps): React.ReactElement {
-    const data = graph.data_arrays[0]?.data_points?.map((dataPoint: any) => {
-        return dataPoint.object;
+
+export default function CustomLineChart({ graph }: ChartProps): React.ReactElement {
+    const data = graph.data_arrays[0]?.data_points?.sort(sortDataPoints).map((dataPoint: any) => {
+        return {
+            ...dataPoint.object,
+            created_at: new Date(dataPoint.created_at).toLocaleString()
+        }
     });
 
     return (
@@ -20,13 +20,13 @@ export default function CustomLineChart({ graph }: LineChartProps): React.ReactE
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart width={730} height={250} data={data} >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis dataKey={"created_at"} />
                         <YAxis />
                         <Tooltip content={<CustomTooltip graph_type={graph.type} />} />
                         <Legend />
                         {
                             graph.meta?.dataKeys?.map((dataKey: string, index: number) => (
-                                <Line type="monotone" dataKey={dataKey} key={index} stroke={colors[index]} />
+                                <Line type="monotone" dataKey={dataKey} key={index} stroke={COLORS[index]} />
                             ))
                         }
                     </LineChart>

@@ -1,17 +1,11 @@
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import CustomTooltip from "./CustomTooltip";
-import Graph from "../../models/Graph";
-import DataArrays from "../../models/DataArray";
+import DataArray from "../../models/DataArray";
 import Error from "../../pages/Error";
 import DataPoint from "../../models/DataPoint";
+import { ChartProps, COLORS } from "./ChartUtils";
 
-interface PieChartProps {
-    graph: Graph;
-}
-
-const colors: string[] = ['var(--color-secondary)', 'var(--color-accent)', 'var(--color-info)', 'var(--color-warning)', 'var(--color-success)', 'var(--color-error)'];
-
-export default function CustomPieChart({ graph }: PieChartProps): React.ReactElement {
+export default function CustomPieChart({ graph }: ChartProps): React.ReactElement {
     return (
         <>
             {
@@ -21,10 +15,10 @@ export default function CustomPieChart({ graph }: PieChartProps): React.ReactEle
                             <Tooltip content={<CustomTooltip graph_type={graph.type} />} />
                             <Legend />
                             {
-                                graph.data_arrays.map((dataArray: DataArrays, oindex: number) => (
-                                    <Pie key={oindex} data={dataArray.data_points.map((data_point: DataPoint) => data_point.object)} dataKey={graph.meta.dataKey} nameKey={graph.meta.nameKey}>
+                                graph.data_arrays.map((dataArray: DataArray, oindex: number) => (
+                                    <Pie key={oindex} data={dataArray.data_points.map((data_point: DataPoint) => data_point.object)} dataKey={graph.meta?.dataKeys[oindex]} nameKey={graph.meta?.nameKeys[oindex]}>
                                         {dataArray.data_points.map((data_point: DataPoint) => data_point.object).map((_, iindex) => (
-                                            <Cell key={`${oindex}-${iindex}`} fill={colors[iindex % colors.length]} />
+                                            <Cell key={`${oindex}-${iindex}`} fill={COLORS[iindex % COLORS.length]} />
                                         ))}
                                     </Pie>
                                 ))

@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from api.views import DataArrayViewSet, DataPointViewSet, GraphViewSet, UserViewSet, UserPasswordUpdateView , TeamViewSet, TeamKeyFunctionalView, PageViewSet, TeamAdminsView, TeamMembersView
+from api.views import DataArrayViewSet, DataPointViewSet, GraphViewSet, UserViewSet, UserPasswordUpdateView , TeamViewSet, TeamKeyFunctionalView, PageViewSet, TeamAdminsView, TeamMembersView, CommentViewSet
 
 from api.views import StaticGraphSizeView, StaticGraphTypeView
 
@@ -31,6 +31,9 @@ urlpatterns = [
     # DataPoint URLs
     path('data_point', DataPointViewSet.as_view({'post': 'create'}), name='data_array_data_points'),
     path('data_point/<int:pk>', DataPointViewSet.as_view({'put': 'partial_update', 'delete': 'destroy'}), name='data_point_detail'),
+    # Comment URLs
+    path('graph/<int:pk>/comment', CommentViewSet.as_view({'post': 'create'}), name='graph_comments'),
+    path('comment/<int:pk>', CommentViewSet.as_view({'delete': 'destroy'}), name='comment_detail'),
 
     # Static views
     path('meta/graph/types', StaticGraphTypeView.as_view(), name='static_graph_types'),

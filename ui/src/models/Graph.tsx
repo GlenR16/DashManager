@@ -1,3 +1,6 @@
+import Comment from "./Comment";
+import DataArray from "./DataArray";
+
 export default interface Graph {
     id: number;
     title: string;
@@ -7,7 +10,8 @@ export default interface Graph {
     type: string;
     size: string;
     order: number;
-    data_arrays: any[];
+    data_arrays: DataArray[];
+    comments: Comment[];
     meta: any;
 
     created_at: Date;

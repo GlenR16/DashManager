@@ -6,7 +6,7 @@ export default function Root(): React.ReactElement {
   return (
     <UserProvider>
         <Navbar />
-        <div className="grow overflow-y-scroll">
+        <div className="grow overflow-y-auto">
             <Outlet />
         </div>
     </UserProvider>

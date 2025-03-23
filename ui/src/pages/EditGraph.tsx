@@ -5,10 +5,14 @@ import useAxiosAuth from "../utils/ApiProvider";
 import { useOutletContext, useParams } from "react-router-dom";
 import Graph from "../models/Graph";
 import Team from "../models/Team";
-import { PencilIcon, PlusCircleIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
-import DataArrays from "../models/DataArray";
+import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
+import DataArray from "../models/DataArray";
 import DataPoint from "../models/DataPoint";
 import AddDataPointModal from "../components/AddDataPointModal";
+
+function displayJson(json: any): string {
+    return JSON.stringify(json, null, 2);
+}
 
 export default function EditGraph(): React.ReactElement {
     const { team } = useOutletContext() as { team: Team };
@@ -26,6 +30,7 @@ export default function EditGraph(): React.ReactElement {
         size: "",
         order: 0,
         data_arrays: [],
+        comments: [],
         meta: {},
 
         created_at: new Date(),
@@ -102,7 +107,7 @@ export default function EditGraph(): React.ReactElement {
                             </h2>
                             <div className="flex flex-col gap-4 py-2">
                                 {
-                                    graph.data_arrays.map((data_array: DataArrays, index: number) => {
+                                    graph.data_arrays.map((data_array: DataArray, index: number) => {
                                         return (
                                             <div key={index} className="overflow-x-auto rounded-box border border-base-content/5">
                                                 <table className="table">
@@ -115,10 +120,12 @@ export default function EditGraph(): React.ReactElement {
                                                                     </span>
                                                                     <div className="flex flex-row gap-2">
                                                                         <button className="btn btn-primary min-h-8 h-8" onClick={() => showAddDataPointModal(data_array.id)}>
-                                                                            <PlusIcon className="w-4 h-4" />
+                                                                            <PlusCircleIcon className="w-5 h-5" />
+                                                                            Add Data Point
                                                                         </button>
                                                                         <button className="btn btn-error min-h-8 h-8" onClick={() => deleteDataArray(data_array.id)}>
                                                                             <TrashIcon className="w-4 h-4" />
+                                                                            Delete Data Array
                                                                         </button>
                                                                     </div>
                                                                 
@@ -141,13 +148,10 @@ export default function EditGraph(): React.ReactElement {
                                                                     <tr key={index}>
                                                                         <th className="w-14">{index + 1}</th>
                                                                         <td>
-                                                                            {JSON.stringify(data_point.object)}
+                                                                            {displayJson(data_point.object)}
                                                                         </td>
-                                                                        <td className="w-32">
+                                                                        <td className="w-16">
                                                                             <div className="flex flex-row gap-2">
-                                                                                <button className="btn btn-primary min-h-8 h-8">
-                                                                                    <PencilIcon className="w-4 h-4" />
-                                                                                </button>
                                                                                 <button className="btn btn-error min-h-8 h-8" onClick={() => deleteDataPoint(data_point.id)}>
                                                                                     <TrashIcon className="w-4 h-4" />
                                                                                 </button>
@@ -170,9 +174,6 @@ export default function EditGraph(): React.ReactElement {
                                         );
                                     })
                                 }
-                            </div>
-                            <div className="card-actions justify-end mt-2">
-                                <SubmitButton label="Save" onClick={() => Promise.resolve()} style="btn-primary btn-block" />
                             </div>
                         </div>
                     </div>
