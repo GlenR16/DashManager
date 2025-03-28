@@ -1,6 +1,6 @@
 import { NavigateFunction, NavLink, useNavigate } from "react-router-dom";
 import { UserContextType, useUser } from "../contexts/UserContext";
-import { HomeIcon, PresentationChartLineIcon } from "@heroicons/react/24/solid";
+import { BoltIcon, HomeIcon, PresentationChartLineIcon } from "@heroicons/react/24/solid";
 
 export default function Navbar(): React.ReactElement {
     const { user, clearUser }: { user : UserContextType | null, clearUser: () => Promise<void>} = useUser();
@@ -31,15 +31,21 @@ export default function Navbar(): React.ReactElement {
                             </NavLink>
                         </li>
                         {
-                            user && user.email ?
-                            <li>
-                                <NavLink to="/dashboard" className={({ isActive }) => isActive ? "bg-primary menu-disabled text-primary-content" : ""}>
-                                    <PresentationChartLineIcon className="w-4 h-4" />
-                                    Dashboard
-                                </NavLink>
-                            </li>
-                            :
-                            <></>
+                            user && user.email &&
+                            <>
+                                <li>
+                                    <NavLink to="/dashboard" className={({ isActive }) => isActive ? "bg-primary menu-disabled text-primary-content" : ""}>
+                                        <PresentationChartLineIcon className="w-4 h-4" />
+                                        Dashboard
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/pipelines" className={({ isActive }) => isActive ? "bg-primary menu-disabled text-primary-content" : ""}>
+                                        <BoltIcon className="w-4 h-4" />
+                                        Pipelines
+                                    </NavLink>
+                                </li>
+                            </>
                         }
                     </ul>
                 </div>
@@ -53,15 +59,21 @@ export default function Navbar(): React.ReactElement {
                             </NavLink>
                         </li>
                         {
-                            user && user.email ?
-                            <li>
-                                <NavLink to="/dashboard" className={({ isActive }) => isActive ? "bg-primary min-h-8 h-8 menu-disabled text-primary-content" : "min-h-8 h-8"}>
-                                    Dashboard
-                                    <PresentationChartLineIcon className="w-4 h-4" />
-                                </NavLink>
-                            </li>
-                            :
-                            <></>
+                            user && user.email &&
+                            <>
+                                <li>
+                                    <NavLink to="/dashboard" className={({ isActive }) => isActive ? "bg-primary min-h-8 h-8 menu-disabled text-primary-content" : "min-h-8 h-8"}>
+                                        Dashboard
+                                        <PresentationChartLineIcon className="w-4 h-4" />
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to="/pipelines" className={({ isActive }) => isActive ? "bg-primary min-h-8 h-8 menu-disabled text-primary-content" : "min-h-8 h-8"}>
+                                        Pipelines
+                                        <BoltIcon className="w-4 h-4" />
+                                    </NavLink>
+                                </li>
+                            </>
                         }
                     </ul>
                 </div>

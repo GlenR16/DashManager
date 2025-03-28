@@ -1,20 +1,29 @@
 import { useEffect, useState } from "react";
 import InputField from "../components/InputField";
 import TextAreaField from "../components/TextAreaField";
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon, ExclamationCircleIcon, ShieldCheckIcon, TrashIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import { AxiosInstance } from "axios";
 import useAxiosAuth from "../utils/ApiProvider";
 import SubmitButton from "../components/SubmitButton";
 import { NavigateFunction, useNavigate, useParams } from "react-router-dom";
 import KeyField from "../components/KeyField";
+import Team from "../models/Team";
+import moment from "moment";
 
 export default function EditTeam(): React.ReactElement {
     const teamId = useParams().teamId as string;
     const axios: AxiosInstance = useAxiosAuth();
     const navigate: NavigateFunction = useNavigate();
 
-    const [teamForm, setTeamForm] = useState<any>({
-        name: ""
+    const [teamForm, setTeamForm] = useState<Team>({
+        id: 0,
+        name: "",
+        invite_code: "",
+        is_admin: false,
+        members: [],
+        admins: [],
+        created_at: new Date(),
+        updated_at: new Date(),
     });
     const [teamErrors, setTeamErrors] = useState<any>({
         name: "",
@@ -71,6 +80,26 @@ export default function EditTeam(): React.ReactElement {
             });
     }
 
+    async function removeAdmin(memberId: number) {
+        return axios.delete("/team/admins", { data: { team: teamId, user: memberId } })
+            .then((_) => {
+                refreshData();
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    async function makeAdmin(memberId: number) {
+        return axios.post("/team/admins", { team: teamId, user: memberId })
+            .then((_) => {
+                refreshData();
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
 
     return (
         <div className="h-full flex flex-col p-4 gap-4">
@@ -94,6 +123,55 @@ export default function EditTeam(): React.ReactElement {
                             }
                             <KeyField secretKey={teamForm.invite_code} refreshTeamData={refreshData} />
                         </div>
+                    </div>
+                    <div className="divider m-0">
+                        Members
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="table bg-base-300 rounded-lg">
+                            <thead className="text-primary font-semibold">
+                                <tr className="text-base">
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Last Login</th>
+                                    <th>Is Active</th>
+                                    <th>Is Admin</th>
+                                    <th>Admin Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-sm">
+                                {
+                                    teamForm.members.map((member, index) => (
+                                        <tr key={index}>
+                                            <td>{member.name}</td>
+                                            <td>{member.email}</td>
+                                            <td>{moment(member.last_login).from(moment(new Date()))}</td>
+                                            <td>
+                                                {
+                                                    member.is_active ? <CheckCircleIcon className="w-6 h-6 text-success ms-5" /> : <XCircleIcon className="h-6 w-6 text-error ms-5"/>
+                                                }
+                                            </td>
+                                            <td>
+                                                {
+                                                    teamForm.admins.some((admin) => admin.id === member.id) ? <CheckCircleIcon className="w-6 h-6 text-success ms-5" /> : <XCircleIcon className="h-6 w-6 text-error ms-5"/>
+                                                }
+                                            </td>
+                                            <td className="w-50">
+                                                {
+                                                    teamForm.admins.some((admin) => admin.id === member.id) ?
+                                                    <SubmitButton label="Remove Admin" icon={<TrashIcon className="h-6 w-6" />} onClick={async () => removeAdmin(member.id)} style="link no-underline w-full" />
+                                                    :
+                                                    <SubmitButton label="Make Admin" icon={<ShieldCheckIcon className="h-6 w-6" />} onClick={async () => makeAdmin(member.id)} style="link no-underline w-full" />
+                                                }
+                                            </td>
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="divider m-0">
+                        Pages
                     </div>
                     {
                         pageForms.map((pageForm, index) => (

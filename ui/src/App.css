@@ -8,10 +8,10 @@
 	default: true;
 	prefersdark: false;
 	color-scheme: "light";
-	--color-base-100: oklch(100% 0 0);
-	--color-base-200: oklch(93% 0 0);
-	--color-base-300: oklch(86% 0 0);
-	--color-base-content: oklch(22.389% 0.031 278.072);
+	--color-base-100: oklch(95.127% 0.007 260.731);
+	--color-base-200: oklch(93.299% 0.01 261.788);
+	--color-base-300: oklch(89.925% 0.016 262.749);
+	--color-base-content: oklch(32.437% 0.022 264.182);
 	--color-primary: oklch(58% 0.158 241.966);
 	--color-primary-content: oklch(100% 0 0);
 	--color-secondary: oklch(55% 0.046 257.417);
@@ -24,10 +24,10 @@
 	--color-info-content: oklch(100% 0 0);
 	--color-success: oklch(62% 0.194 149.214);
 	--color-success-content: oklch(100% 0 0);
-	--color-warning: oklch(85% 0.199 91.936);
-	--color-warning-content: oklch(0% 0 0);
-	--color-error: oklch(70% 0.191 22.216);
-	--color-error-content: oklch(0% 0 0);
+    --color-warning: oklch(70.081% 0.164 56.844);
+    --color-warning-content: oklch(14.016% 0.032 56.844);
+    --color-error: oklch(53.07% 0.241 24.16);
+    --color-error-content: oklch(90.614% 0.048 24.16);
 	--radius-selector: 0.25rem;
 	--radius-field: 0.25rem;
 	--radius-box: 0.25rem;
@@ -73,6 +73,18 @@
 	--noise: 0;
 }
 
+.carbon-fiber {
+	background-image: radial-gradient(circle at center center, transparent, var(--color-base-300)), repeating-linear-gradient(135deg, var(--color-base-300) 0px, var(--color-base-300) 2px, transparent 2px, transparent 10px, var(--color-base-300) 10px, var(--color-base-300) 11px, transparent 11px, transparent 21px), repeating-linear-gradient(45deg, var(--color-base-200) 0px, var(--color-base-200) 4px, transparent 4px, transparent 8px), linear-gradient(90deg, var(--color-base-300), var(--color-base-300));
+}
+
+* {
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
 #root {
 	height: 100%;
 	width: 100%;
@@ -87,4 +99,11 @@
 	&:hover {
 		text-decoration: none !important;
 	}
+}
+
+@font-face {
+	font-family: "Pacifico";
+	src: url("./assets/Pacifico-Regular.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
 }

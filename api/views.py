@@ -25,6 +25,10 @@ class UserViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.Updat
     def get_object(self):
         return self.request.user
     
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()
+    
 class UserPasswordUpdateView(mixins.UpdateModelMixin,GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = UserPasswordUpdateSerializer
@@ -96,7 +100,7 @@ class TeamAdminsView(APIView):
         if user is None:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"user": ["Invalid user id."]})
         team.admins.add(user)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK, data={"message": "User added as admin."})
     
     def delete(self, request, *args, **kwargs):
         if 'user' not in request.data:

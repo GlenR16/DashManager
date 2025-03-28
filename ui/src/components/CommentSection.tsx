@@ -4,9 +4,10 @@ import SubmitButton from "./SubmitButton";
 import Error from "../pages/Error";
 import { AxiosInstance } from "axios";
 import useAxiosAuth from "../utils/ApiProvider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import moment from "moment";
 import { UserContextType, useUser } from "../contexts/UserContext";
+import { sortByCreatedAt, sortByDescCreatedAt } from "./charts/ChartUtils";
 
 interface CommentSectionProps {
     graph: Graph;
@@ -15,7 +16,7 @@ interface CommentSectionProps {
 
 export default function CommentSection({ graph, refreshBaseData }: CommentSectionProps): React.ReactElement {
     const axios: AxiosInstance = useAxiosAuth();
-    const { user }: { user : UserContextType | null } = useUser();
+    const { user }: { user: UserContextType | null } = useUser();
     const [commentForm, setCommentForm] = useState({
         content: ""
     });
@@ -35,12 +36,17 @@ export default function CommentSection({ graph, refreshBaseData }: CommentSectio
         return axios.post(`/graph/${graph.id}/comment`, commentForm)
             .then((response) => {
                 refreshBaseData();
+                setCommentForm({ content: "" });
                 console.log(response.data);
             })
             .catch((error) => {
                 console.error(error);
             });
     }
+
+    useEffect(() => {
+        document.getElementById(`comment_bottom_${graph.id}`)?.scrollIntoView();
+    }, [graph.comments]);
 
     return (
         <dialog id={`Comment_${graph.id}_Modal`} className="modal">
@@ -60,30 +66,31 @@ export default function CommentSection({ graph, refreshBaseData }: CommentSectio
                         graph.comments.length > 0 ?
                             <div className="flex flex-col gap-2 py-2">
                                 {
-                                    graph.comments.map((comment, index) => {
+                                    graph.comments.sort(sortByCreatedAt).map((comment, index) => {
                                         return (
-                                            <div key={index} className="flex flex-row gap-4 items-start">
+                                            <div key={index} className="flex flex-row gap-2 items-start">
                                                 <div className="rounded-full avatar border-2 border-primary min-w-10 min-h-10 p-1 flex items-center justify-center">
-                                                    { comment.user.name?.split(" ")[0][0].toUpperCase() + comment.user.name?.split(" ")[1][0].toUpperCase() }
+                                                    {comment.user.name?.split(" ")[0][0].toUpperCase() + comment.user.name?.split(" ")[1][0].toUpperCase()}
                                                 </div>
                                                 <div className="grow max-w-[90%] flex flex-col gap-1">
                                                     <div className="inline-flex gap-2 items-center text-sm">
                                                         <b>@{comment.user.name}</b> - {moment(comment.created_at).from(moment(new Date()))}
+                                                        {
+                                                            user && user.id === comment.user.id &&
+                                                            <button onClick={() => deleteComment(comment.id)} className="link" >
+                                                                <TrashIcon className="w-5 h-5 text-error" />
+                                                            </button>
+                                                        }
                                                     </div>
                                                     <div>
                                                         {comment.content}
                                                     </div>
                                                 </div>
-                                                {
-                                                    user && user.id === comment.user.id &&
-                                                    <button onClick={() => deleteComment(comment.id)} className="link" >
-                                                        <TrashIcon className="w-6 h-6 text-error" />
-                                                    </button>
-                                                }
                                             </div>
                                         )
                                     })
                                 }
+                                <div id={`comment_bottom_${graph.id}`}></div>
                             </div>
                             :
                             <Error message="No comments available" />

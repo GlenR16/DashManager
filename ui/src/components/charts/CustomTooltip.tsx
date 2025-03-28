@@ -14,7 +14,7 @@ export default function CustomTooltip(props: any): React.ReactNode | Promise<Rea
     if (props.active) {
         return (
             <div className="bg-base-300 p-2 rounded-md border border-primary">
-                <p className="font-semibold">
+                <p className="font-semibold text-sm">
                     {
                         isNaN(new Date(props.label).getTime()) ?
                             props.label

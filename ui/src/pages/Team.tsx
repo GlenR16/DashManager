@@ -9,7 +9,6 @@ export default function Team(): React.ReactElement {
     const { selectedPage, refreshBaseData } = useOutletContext() as { selectedPage: Page, refreshBaseData: () => Promise<void> };
 
     return (
-
         <div className="h-full w-full flex flex-col p-4">
             {
                 selectedPage ?
@@ -37,7 +36,6 @@ export default function Team(): React.ReactElement {
                     :
                     <Error message="No pages found" />
             }
-
         </div>
     )
 }

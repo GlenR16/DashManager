@@ -1,10 +1,10 @@
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { ChartProps, COLORS, sortDataPoints } from './ChartUtils'
+import { ChartProps, COLORS, sortByCreatedAt } from './ChartUtils'
 import Error from '../../pages/Error'
 import CustomTooltip from './CustomTooltip';
 
 export default function CustomAreaChart({ graph }: ChartProps): React.ReactElement {
-    const data = graph.data_arrays[0]?.data_points?.sort(sortDataPoints).map((dataPoint: any) => {
+    const data = graph.data_arrays[0]?.data_points?.sort(sortByCreatedAt).map((dataPoint: any) => {
         return {
             ...dataPoint.object,
             created_at: new Date(dataPoint.created_at).toLocaleString()

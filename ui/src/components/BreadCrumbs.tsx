@@ -1,4 +1,4 @@
-import { ChartBarIcon, DocumentChartBarIcon, PencilIcon, UserGroupIcon } from "@heroicons/react/24/solid";
+import { ChartBarIcon, DocumentChartBarIcon, PencilIcon, PresentationChartBarIcon, UserGroupIcon } from "@heroicons/react/24/solid";
 import { NavLink, useParams } from "react-router-dom";
 import Team from "../models/Team";
 import Page from "../models/Page";
@@ -20,7 +20,7 @@ export default function BreadCrumbs({ pathname, team, pages, selectedPage }: Bre
             <ul>
                 <li>
                     <NavLink to={"/dashboard"}>
-                        <ChartBarIcon className="w-4 h-4" />
+                        <PresentationChartBarIcon className="w-4 h-4" />
                         Dashboard
                     </NavLink>
                 </li>
@@ -79,12 +79,6 @@ export default function BreadCrumbs({ pathname, team, pages, selectedPage }: Bre
                                 <>
                                     <li>
                                         <span className="inline-flex items-center gap-2 not-a-link">
-                                            <DocumentChartBarIcon className="w-4 h-4" />
-                                            {pages.filter((page: Page) => page.id == parseInt(pageId))[0]?.title}
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <span className="inline-flex items-center gap-2 not-a-link">
                                             <PencilIcon className="w-4 h-4" />
                                             Edit Page
                                         </span>
@@ -109,7 +103,7 @@ export default function BreadCrumbs({ pathname, team, pages, selectedPage }: Bre
                                 <>
                                     <li>
                                         <span className="inline-flex items-center gap-2 not-a-link">
-                                            <DocumentChartBarIcon className="w-4 h-4" />
+                                            <ChartBarIcon className="w-4 h-4" />
                                             {pages.filter((page: Page) => page.id == parseInt(pageId))[0]?.graphs.filter((graph) => graph.id == parseInt(graphId))[0]?.title}
                                         </span>
                                     </li>
@@ -123,7 +117,7 @@ export default function BreadCrumbs({ pathname, team, pages, selectedPage }: Bre
                                 :
                                 <li>
                                     <span className="inline-flex items-center gap-2 not-a-link">
-                                        <DocumentChartBarIcon className="w-4 h-4" />
+                                        <ChartBarIcon className="w-4 h-4" />
                                         {pages.filter((page: Page) => page.id == parseInt(pageId))[0]?.title}
                                     </span>
                                 </li>

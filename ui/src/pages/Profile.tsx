@@ -4,7 +4,7 @@ import { UserContextType, useUser } from "../contexts/UserContext";
 import { useEffect, useState } from "react";
 import { AxiosInstance } from "axios";
 import useAxiosAuth from "../utils/ApiProvider";
-import { ClockIcon, ExclamationCircleIcon, KeyIcon } from "@heroicons/react/24/solid";
+import { ClockIcon, ExclamationCircleIcon, KeyIcon, TrashIcon } from "@heroicons/react/24/solid";
 import InputField from "../components/InputField";
 import moment from "moment";
 
@@ -140,7 +140,7 @@ export default function Profile(): React.ReactElement {
 								{editMode && (
 									<>
 										<SubmitButton label="Update" onClick={submitUpdateUser} />
-                                        <SubmitButton label="Delete" style="btn-error" onClick={() => (document.getElementById("deleteUserModal") as any)?.showModal()} />
+                                        <SubmitButton label="Delete Account" style="btn-error" onClick={() => (document.getElementById("deleteUserModal") as any)?.showModal()} />
 										<dialog id="deleteUserModal" className="modal">
 											<div className="modal-box bg-base-200">
 												<div className="sm:flex sm:items-start">

@@ -14,13 +14,13 @@ const messages: string[] = [
     "Dividing by zero",
     "Loading the loading screen",
     "Removing indents from the codebase",
-    
+    "Sorting the bits and bytes",
 ];
 
 export default function Loading(): React.ReactElement {
 
     return (
-        <div className="grow h-full w-full flex flex-col items-center justify-center gap-4">
+        <div className="grow h-full w-full flex flex-col items-center justify-center gap-4" id="loading">
             <div className="flex flex-row gap-4 items-center">
                 <span className="loading loading-dots loading-xl"></span>
                 <div className="text-xl font-semibold">

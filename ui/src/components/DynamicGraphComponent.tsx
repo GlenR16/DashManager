@@ -16,7 +16,7 @@ interface DynamicGraphComponentProps {
     refreshBaseData: () => Promise<void>;
 }
 
-const baseClass = "rounded-box border-2 border-primary bg-base-100 h-64 p-2 flex flex-col gap-2";
+const baseClass = "rounded-box border-2 border-primary bg-base-100 h-74 p-2 flex flex-col gap-1";
 
 function renderGraph(graph: Graph) {
     switch (graph.type) {

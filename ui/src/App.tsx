@@ -1,4 +1,4 @@
-import { createHashRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { createHashRouter, RouterProvider } from 'react-router-dom'
 import './App.css'
 import Root from './pages/Root'
 import Error from './pages/Error'

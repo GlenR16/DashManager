@@ -79,7 +79,7 @@ export default function TeamDetailRoot(): React.ReactElement {
                             </div>
                         }
                     </div>
-                    <div className="grow w-full">
+                    <div className="grow w-full min-h-[calc(100vh-7rem)]">
                         <Outlet context={{ team, selectedPage, refreshBaseData }} />
                     </div>
                 </div>
